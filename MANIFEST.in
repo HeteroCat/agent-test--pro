@@ -1,0 +1,4 @@
+include README.md
+include requirements.txt
+include api_tester/templates/*.html
+recursive-include api_tester/static *
