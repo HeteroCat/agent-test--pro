@@ -36,3 +36,4 @@ git clone https://github.com/f112o/API-test-for-fastGPT.git
 cd api-tester-tool
 pip install -e .
 ```
+Written by FWB.
