@@ -1,7 +1,7 @@
 import json
 import os
 from .utils.get_res import get_response_data
-
+import time
 
 def test_api(url, token, content, output_dir, filename, **kwargs):
     """
@@ -24,10 +24,10 @@ def test_api(url, token, content, output_dir, filename, **kwargs):
         
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(response_data, f, ensure_ascii=False, indent=4)
-        print(f"响应已保存到: {output_path}")
+        print(f"响应已保存到: {output_path}", end="")
         return response_data
     else:
-        print("No response data received.")
+        print("No response data received.", end="")
         return None
 
 
@@ -46,7 +46,7 @@ def batch_test(url, token, test_dir, output_dir, variables_dir=""):
         
     test_count = 0
     success_count = 0
-    
+    time_start = time.time()
     for dirpath, dirnames, filenames in os.walk(test_dir):
         for filename in filenames:
             if filename.endswith(".json"):
@@ -54,16 +54,18 @@ def batch_test(url, token, test_dir, output_dir, variables_dir=""):
                 try:
                     with open(file_path, "r", encoding="utf-8") as f:
                         content = json.load(f)
+                        t0 = time.time()
                     print(f"正在测试: {file_path}")
                     if variables_dir and os.path.exists(os.path.join(variables_dir, filename)):
                         with open(os.path.join(variables_dir, filename), "r", encoding="utf-8") as var_file:
                             variables = json.load(var_file)
                     result = test_api(url, token, content, output_dir, filename, variables=variables if variables_dir and os.path.exists(os.path.join(variables_dir, filename)) else {})
+                    print(" ，用时",time.time() - t0, "秒")
                     test_count += 1
                     if result:
                         success_count += 1
                 except Exception as e:
                     print(f"测试文件 {file_path} 时出错: {str(e)}")
                     test_count += 1
-    
-    print(f"\n测试完成! 总计: {test_count}, 成功: {success_count}, 失败: {test_count - success_count}")
+    time_end = time.time()
+    print(f"\n测试完成! 总计: {test_count}, 成功: {success_count}, 失败: {test_count - success_count}, 耗时: {time_end - time_start:.2f}秒")
