@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>批量测试 - API Tester Pro</title>
+    
+    <!-- 外部资源引入 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --success-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --text-primary: #2d3748;
+            --text-secondary: #4a5568;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --bg-white: #ffffff;
+            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --border-light: rgba(102, 126, 234, 0.1);
+        }
+        
+        [data-theme="dark"] {
+            --text-primary: #f7fafc;
+            --text-secondary: #e2e8f0;
+            --text-light: #a0aec0;
+            --bg-light: #1a202c;
+            --bg-white: #2d3748;
+            --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+            --border-light: rgba(255, 255, 255, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .navbar {
+            background: rgba(45, 55, 72, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .nav-brand i {
+            margin-right: 0.75rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .nav-link.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .theme-toggle {
+            background: var(--bg-white);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        /* 页面头部 */
+        .page-header {
+            background: var(--primary-gradient);
+            padding: 4rem 2rem 2rem;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+        }
+        
+        .page-header-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .page-title {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        
+        .page-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            max-width: 1200px;
+            margin: -2rem auto 0;
+            padding: 0 2rem 4rem;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+        
+        .card {
+            background: var(--bg-white);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: white;
+        }
+        
+        .config-card .card-icon {
+            background: var(--primary-gradient);
+        }
+        
+        .results-card .card-icon {
+            background: var(--accent-gradient);
+        }
+        
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-upload-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border: 2px dashed var(--border-light);
+            border-radius: 12px;
+            background: var(--bg-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .file-upload-label:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .file-upload-icon {
+            font-size: 2rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+        
+        .file-upload-text {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-light);
+            color: var(--text-primary);
+            border: 2px solid var(--border-light);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border-light);
+        }
+        
+        .btn-success {
+            background: var(--success-gradient);
+            color: var(--text-primary);
+        }
+        
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        /* 结果表格 */
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        
+        .results-table th,
+        .results-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-light);
+        }
+        
+        .results-table th {
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background: rgba(72, 187, 120, 0.1);
+            color: #38a169;
+        }
+        
+        .status-error {
+            background: rgba(245, 101, 101, 0.1);
+            color: #e53e3e;
+        }
+        
+        .status-pending {
+            background: rgba(237, 137, 54, 0.1);
+            color: #dd6b20;
+        }
+        
+        /* 进度条 */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-light);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-gradient);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .main-content {
+                padding: 0 1rem 2rem;
+            }
+        }
+        
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <i class="fas fa-rocket"></i>
+                API Tester Pro
+            </a>
+            <div style="display: flex; align-items: center;">
+                <div class="nav-links">
+                    <a href="/" class="nav-link">
+                        <i class="fas fa-home" style="margin-right: 0.5rem;"></i>首页
+                    </a>
+                    <a href="/test" class="nav-link">
+                        <i class="fas fa-flask" style="margin-right: 0.5rem;"></i>测试
+                    </a>
+                    <a href="/batch" class="nav-link active">
+                        <i class="fas fa-layer-group" style="margin-right: 0.5rem;"></i>批量测试
+                    </a>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">
+                    <i class="fas fa-moon" id="theme-icon"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- 页面头部 -->
+    <section class="page-header">
+        <div class="page-header-content fade-in">
+            <h1 class="page-title">
+                <i class="fas fa-layer-group" style="margin-right: 1rem;"></i>
+                批量测试
+            </h1>
+            <p class="page-subtitle">
+                高效的批量API测试解决方案，支持并发处理和详细统计分析
+            </p>
+        </div>
+    </section>
+    
+    <!-- 主要内容 -->
+    <div class="main-content">
+        <div class="content-grid fade-in">
+            <!-- 配置区域 -->
+            <div class="card config-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <h2 class="card-title">测试配置</h2>
+                </div>
+                
+                <form id="batchForm">
+                    <div class="form-group">
+                        <label class="form-label" for="apiEndpoint">
+                            <i class="fas fa-link" style="margin-right: 0.5rem;"></i>
+                            API端点
+                        </label>
+                        <input type="url" id="apiEndpoint" class="form-input" 
+                               placeholder="https://api.example.com/endpoint" 
+                               value="https://ai-course-fast.huayuntiantu.com/api/v1/chat/completions">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="authToken">
+                            <i class="fas fa-key" style="margin-right: 0.5rem;"></i>
+                            认证令牌
+                        </label>
+                        <input type="password" id="authToken" class="form-input" 
+                               placeholder="Bearer token 或 API key">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="concurrency">
+                            <i class="fas fa-tachometer-alt" style="margin-right: 0.5rem;"></i>
+                            并发数量
+                        </label>
+                        <input type="number" id="concurrency" class="form-input" 
+                               value="5" min="1" max="20">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-upload" style="margin-right: 0.5rem;"></i>
+                            测试数据文件
+                        </label>
+                        <div class="file-upload">
+                            <input type="file" id="testFile" class="file-upload-input" 
+                                   accept=".json,.csv,.txt" onchange="handleFileUpload(event)">
+                            <label for="testFile" class="file-upload-label">
+                                <div>
+                                    <div class="file-upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <div class="file-upload-text">
+                                        点击上传或拖拽文件到此处<br>
+                                        <small>支持 JSON, CSV, TXT 格式</small>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="fileInfo" style="margin-top: 0.5rem; color: var(--text-light); font-size: 0.9rem;"></div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem;">
+                        <button type="button" class="btn btn-primary" onclick="startBatchTest()" id="startBtn">
+                            <i class="fas fa-play"></i>
+                            开始测试
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="stopBatchTest()" id="stopBtn" disabled>
+                            <i class="fas fa-stop"></i>
+                            停止测试
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="exportResults()" id="exportBtn" disabled>
+                            <i class="fas fa-download"></i>
+                            导出结果
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- 结果区域 -->
+            <div class="card results-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h2 class="card-title">测试结果</h2>
+                </div>
+                
+                <!-- 统计信息 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalTests">0</div>
+                        <div class="stat-label">总测试数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="successTests">0</div>
+                        <div class="stat-label">成功</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="failedTests">0</div>
+                        <div class="stat-label">失败</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avgTime">0ms</div>
+                        <div class="stat-label">平均耗时</div>
+                    </div>
+                </div>
+                
+                <!-- 进度条 -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div style="text-align: center; margin-bottom: 1rem; color: var(--text-light); font-size: 0.9rem;" id="progressText">
+                    等待开始测试...
+                </div>
+                
+                <!-- 结果表格 -->
+                <div style="max-height: 400px; overflow-y: auto;">
+                    <table class="results-table" id="resultsTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>状态</th>
+                                <th>响应时间</th>
+                                <th>状态码</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--text-light); padding: 2rem;">
+                                    <i class="fas fa-info-circle" style="margin-right: 0.5rem;"></i>
+                                    暂无测试结果
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testData = [];
+        let isRunning = false;
+        let currentTestIndex = 0;
+        let results = [];
+        
+        // 主题切换功能
+        function toggleTheme() {
+            const html = document.documentElement;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        
+        // 初始化主题
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+        
+        // 文件上传处理
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileInfo = document.getElementById('fileInfo');
+            fileInfo.innerHTML = `<i class="fas fa-file"></i> ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    if (file.name.endsWith('.json')) {
+                        testData = JSON.parse(content);
+                    } else if (file.name.endsWith('.csv')) {
+                        // 简单的CSV解析
+                        const lines = content.split('\n').filter(line => line.trim());
+                        testData = lines.slice(1).map(line => {
+                            const values = line.split(',');
+                            return { message: values[0] || 'Test message' };
+                        });
+                    } else {
+                        // TXT文件，每行一个测试
+                        const lines = content.split('\n').filter(line => line.trim());
+                        testData = lines.map(line => ({ message: line.trim() }));
+                    }
+                    
+                    fileInfo.innerHTML += ` - 已加载 ${testData.length} 条测试数据`;
+                    document.getElementById('totalTests').textContent = testData.length;
+                } catch (error) {
+                    fileInfo.innerHTML = `<i class="fas fa-exclamation-triangle"></i> 文件解析失败: ${error.message}`;
+                    fileInfo.style.color = '#e53e3e';
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        // 开始批量测试
+        async function startBatchTest() {
+            if (testData.length === 0) {
+                alert('请先上传测试数据文件');
+                return;
+            }
+            
+            const endpoint = document.getElementById('apiEndpoint').value;
+            const token = document.getElementById('authToken').value;
+            const concurrency = parseInt(document.getElementById('concurrency').value);
+            
+            if (!endpoint) {
+                alert('请输入API端点地址');
+                return;
+            }
+            
+            isRunning = true;
+            currentTestIndex = 0;
+            results = [];
+            
+            // 更新UI状态
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('exportBtn').disabled = true;
+            document.getElementById('resultsBody').innerHTML = '';
+            
+            // 重置统计
+            updateStats();
+            
+            // 开始测试
+            await runBatchTests(endpoint, token, concurrency);
+        }
+        
+        // 执行批量测试
+        async function runBatchTests(endpoint, token, concurrency) {
+            const chunks = [];
+            for (let i = 0; i < testData.length; i += concurrency) {
+                chunks.push(testData.slice(i, i + concurrency));
+            }
+            
+            for (const chunk of chunks) {
+                if (!isRunning) break;
+                
+                const promises = chunk.map((data, index) => 
+                    runSingleTest(endpoint, token, data, currentTestIndex + index)
+                );
+                
+                await Promise.all(promises);
+                currentTestIndex += chunk.length;
+                
+                // 更新进度
+                const progress = (currentTestIndex / testData.length) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = 
+                    `已完成 ${currentTestIndex}/${testData.length} (${progress.toFixed(1)}%)`;
+                
+                updateStats();
+            }
+            
+            // 测试完成
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('progressText').textContent = '测试完成';
+        }
+        
+        // 执行单个测试
+        async function runSingleTest(endpoint, token, data, index) {
+            const startTime = Date.now();
+            let result = {
+                index: index + 1,
+                status: 'pending',
+                responseTime: 0,
+                statusCode: 0,
+                error: null,
+                response: null
+            };
+            
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (token) {
+                    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                }
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(data)
+                });
+                
+                const endTime = Date.now();
+                result.responseTime = endTime - startTime;
+                result.statusCode = response.status;
+                result.status = response.ok ? 'success' : 'error';
+                
+                if (!response.ok) {
+                    result.error = `HTTP ${response.status}: ${response.statusText}`;
+                }
+                
+                result.response = await response.text();
+                
+            } catch (error) {
+                const endTime = Date.now();
+                result.responseTime = endTime - startTime;
+                result.status = 'error';
+                result.error = error.message;
+            }
+            
+            results.push(result);
+            addResultRow(result);
+            
+            return result;
+        }
+        
+        // 添加结果行
+        function addResultRow(result) {
+            const tbody = document.getElementById('resultsBody');
+            const row = document.createElement('tr');
+            
+            const statusClass = result.status === 'success' ? 'status-success' : 
+                               result.status === 'error' ? 'status-error' : 'status-pending';
+            
+            row.innerHTML = `
+                <td>${result.index}</td>
+                <td><span class="status-badge ${statusClass}">${result.status}</span></td>
+                <td>${result.responseTime}ms</td>
+                <td>${result.statusCode || '-'}</td>
+                <td>
+                    <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" 
+                            onclick="viewResult(${result.index - 1})">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </td>
+            `;
+            
+            tbody.appendChild(row);
+            
+            // 滚动到最新结果
+            row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        
+        // 更新统计信息
+        function updateStats() {
+            const total = results.length;
+            const success = results.filter(r => r.status === 'success').length;
+            const failed = results.filter(r => r.status === 'error').length;
+            const avgTime = total > 0 ? 
+                Math.round(results.reduce((sum, r) => sum + r.responseTime, 0) / total) : 0;
+            
+            document.getElementById('totalTests').textContent = testData.length || 0;
+            document.getElementById('successTests').textContent = success;
+            document.getElementById('failedTests').textContent = failed;
+            document.getElementById('avgTime').textContent = `${avgTime}ms`;
+        }
+        
+        // 停止测试
+        function stopBatchTest() {
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('exportBtn').disabled = false;
+            document.getElementById('progressText').textContent = '测试已停止';
+        }
+        
+        // 查看结果详情
+        function viewResult(index) {
+            const result = results[index];
+            if (!result) return;
+            
+            let content = `测试 #${result.index}\n\n`;
+            content += `状态: ${result.status}\n`;
+            content += `响应时间: ${result.responseTime}ms\n`;
+            content += `状态码: ${result.statusCode}\n`;
+            
+            if (result.error) {
+                content += `错误: ${result.error}\n`;
+            }
+            
+            if (result.response) {
+                content += `\n响应内容:\n${result.response}`;
+            }
+            
+            alert(content);
+        }
+        
+        // 导出结果
+        function exportResults() {
+            if (results.length === 0) {
+                alert('没有可导出的结果');
+                return;
+            }
+            
+            const csvContent = [
+                ['序号', '状态', '响应时间(ms)', '状态码', '错误信息'].join(','),
+                ...results.map(r => [
+                    r.index,
+                    r.status,
+                    r.responseTime,
+                    r.statusCode || '',
+                    (r.error || '').replace(/,/g, ';')
+                ].join(','))
+            ].join('\n');
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `batch_test_results_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+            link.click();
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+        });
+    </script>
+</body>
+</html>

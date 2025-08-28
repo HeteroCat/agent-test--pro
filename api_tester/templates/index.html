@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>华云智能体测试平台</title>
+    
+    <!-- 外部资源引入 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@latest/marked.min.js"></script>
+    
+    <style>
+        :root {
+            /* 浅色模式变量 */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+        
+        [data-theme="dark"] {
+            /* 深色模式变量 */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #a78bfa;
+            --accent-gradient: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+        }
+        
+        /* 导航栏样式 */
+        nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        [data-theme="dark"] nav {
+            background: rgba(15, 23, 42, 0.8);
+            border-bottom: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+        }
+        
+        [data-theme="dark"] .nav-item:hover {
+            background: rgba(96, 165, 250, 0.2) !important;
+        }
+        
+        .nav-item-active {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        [data-theme="dark"] .nav-item-active {
+            background: rgba(96, 165, 250, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+        
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        [data-theme="dark"] .navbar {
+            background: rgba(45, 55, 72, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+        
+        .nav-brand i {
+            margin-right: 0.75rem;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .nav-link {
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .nav-link.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .theme-toggle {
+            background: var(--bg-white);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 1rem;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-soft);
+        }
+        
+        /* Hero 区域 */
+        .hero {
+            background: var(--accent-gradient);
+            padding: 6rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="white" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            pointer-events: none;
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 4xl;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            line-height: 1.2;
+        }
+        
+        .hero .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+        
+        .hero .description {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            max-width: 600px;
+            margin: 0 auto 3rem;
+            line-height: 1.7;
+        }
+        
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* 主容器 */
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-xl);
+            border-radius: 0;
+            overflow: hidden;
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 80vh;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
+        .input-section {
+            padding: 3rem;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            min-width: 0;
+            overflow-x: auto;
+        }
+        
+        .output-section {
+            padding: 3rem;
+            background: var(--bg-primary);
+            min-width: 0;
+            overflow-x: auto;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            background: var(--accent-gradient);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+        
+        .section-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+        
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        .form-label i {
+            color: var(--accent-primary);
+            font-size: 0.9rem;
+        }
+        
+        .input-wrapper {
+            position: relative;
+        }
+        
+        input[type="text"], input[type="url"], textarea {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            font-size: 0.95rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 8rem;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Consolas', monospace;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        
+        .input-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .input-hint i {
+            font-size: 0.7rem;
+        }
+        
+        /* 按钮样式 */
+        .btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .btn:hover:before {
+            left: 100%;
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn i {
+            font-size: 1.1rem;
+        }
+        
+        /* 响应区域样式 */
+        .response-container {
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            min-height: 20rem;
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Consolas', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 30rem;
+            color: var(--text-primary);
+            line-height: 1.6;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .response-container:hover {
+            border-color: var(--accent-primary);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            color: var(--accent-primary);
+            font-style: italic;
+            font-weight: 400;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+        }
+        
+        .loading i {
+            animation: spin 1s linear infinite;
+            margin-right: 0.5rem;
+        }
+        
+        /* 执行时间样式 */
+        .execution-time {
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+        }
+        
+        .execution-time i {
+            color: var(--accent-primary);
+            font-size: 0.8rem;
+        }
+        
+        .execution-time strong {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .message {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .error {
+            color: #dc2626;
+            background: rgba(220, 38, 38, 0.1);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+        
+        .success {
+            color: #059669;
+            background: rgba(5, 150, 105, 0.1);
+            border: 1px solid rgba(5, 150, 105, 0.2);
+        }
+        
+        .warning {
+            color: #d97706;
+            background: rgba(217, 119, 6, 0.1);
+            border: 1px solid rgba(217, 119, 6, 0.2);
+        }
+        
+        /* Markdown 渲染样式 */
+        .response-container h1,
+        .response-container h2,
+        .response-container h3,
+        .response-container h4,
+        .response-container h5,
+        .response-container h6 {
+            color: var(--text-primary);
+            margin: 1rem 0 0.5rem 0;
+            font-weight: 600;
+        }
+        
+        .response-container h1 { font-size: 1.5rem; }
+        .response-container h2 { font-size: 1.3rem; }
+        .response-container h3 { font-size: 1.1rem; }
+        
+        .response-container p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+        
+        .response-container ul,
+        .response-container ol {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .response-container li {
+            margin: 0.25rem 0;
+        }
+        
+        .response-container code {
+            background: var(--bg-tertiary);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .response-container pre {
+            background: var(--bg-tertiary);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+        }
+        
+        .response-container pre code {
+            background: none;
+            padding: 0;
+        }
+        
+        .response-container blockquote {
+            border-left: 4px solid var(--accent-primary);
+            padding-left: 1rem;
+            margin: 0.5rem 0;
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+        
+        .response-container a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+        
+        .response-container a:hover {
+            text-decoration: underline;
+        }
+        
+        .response-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+        }
+        
+        .response-container th,
+        .response-container td {
+            border: 1px solid var(--border-color);
+            padding: 0.5rem;
+            text-align: left;
+        }
+        
+        .response-container th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .hero-stats {
+                gap: 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .hero {
+                padding: 4rem 1.5rem 3rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero .subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .input-section, .output-section {
+                padding: 2rem 1.5rem;
+            }
+            
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .input-section, .output-section {
+                padding: 1.5rem 1rem;
+            }
+            
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+        
+        /* 选择文本样式 */
+        ::selection {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--text-primary);
+        }
+        
+        /* 微交互动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40%, 43% {
+                transform: translateY(-10px);
+            }
+            70% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px var(--accent-primary);
+            }
+            50% {
+                box-shadow: 0 0 20px var(--accent-primary), 0 0 30px var(--accent-primary);
+            }
+        }
+        
+        /* 页面加载动画 */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .fade-in-down {
+            animation: fadeInDown 0.6s ease-out;
+        }
+        
+        .slide-in-left {
+            animation: slideInLeft 0.6s ease-out;
+        }
+        
+        .slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        /* 悬停动画 */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hover-glow:hover {
+            animation: glow 2s infinite;
+        }
+        
+        /* 按钮点击动画 */
+        .btn-click {
+            animation: pulse 0.3s ease;
+        }
+        
+        /* 消息弹出动画 */
+        .message-enter {
+            animation: slideInLeft 0.4s ease-out;
+        }
+        
+        /* 加载动画增强 */
+        .loading-enhanced {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .loading-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
+        
+        /* 响应区域动画 */
+        .response-container.has-content {
+            transform: scale(1.02);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* 输入焦点动画 */
+        .form-group input:focus,
+        .form-group textarea:focus {
+            animation: glow 0.5s ease-out;
+        }
+        
+        /* 主题切换动画 */
+        .theme-toggle:hover {
+            transform: rotate(180deg) scale(1.1);
+        }
+        
+        /* 统计数据动画 */
+        .stat-item {
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-item:hover {
+            transform: scale(1.1);
+        }
+        
+        /* 页面切换动画 */
+            body {
+                animation: fadeInUp 0.8s ease-out;
+            }
+            
+            /* 初始隐藏状态 */
+            .theme-toggle,
+            .input-section,
+            .output-section {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.6s ease-out;
+            }
+            
+            .stat-item {
+                opacity: 0;
+                transform: translateY(20px);
+                transition: all 0.6s ease-out;
+            }
+            
+            /* 焦点状态增强 */
+            .form-group.focused {
+                transform: scale(1.02);
+            }
+            
+            .form-group.focused .form-label {
+                color: var(--accent-primary);
+                font-weight: 600;
+            }
+        
+        /* 错误抖动动画 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">
+                <i class="fas fa-rocket"></i>
+                API Tester Pro
+            </a>
+            <div class="nav-links">
+                <a href="/" class="nav-link">
+                    <i class="fas fa-home" style="margin-right: 0.5rem;"></i>首页
+                </a>
+                <a href="/test" class="nav-link active">
+                    <i class="fas fa-flask" style="margin-right: 0.5rem;"></i>测试
+                </a>
+                <a href="/batch" class="nav-link">
+                    <i class="fas fa-layer-group" style="margin-right: 0.5rem;"></i>批量测试
+                </a>
+                <button class="theme-toggle" onclick="toggleTheme()" title="切换主题">
+                    <i class="fas fa-moon" id="theme-icon-nav"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+    
+
+    
+    
+    
+    <!-- 主容器 -->
+    <div class="container">
+        <div class="main-content">
+            <!-- 输入区域 -->
+            <div class="input-section slide-in-left">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">请求配置</h2>
+                        <p class="section-subtitle">配置您的API请求参数</p>
+                    </div>
+                </div>
+                
+                <div class="form-group" style="display: none;">
+                    <label class="form-label" for="apiUrl">
+                        <i class="fas fa-link"></i>
+                        API端点地址
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="url" id="apiUrl" value="https://ai-course-fast.huayuntiantu.com/api/v1/chat/completions" placeholder="输入API端点URL">
+                        <div class="input-hint">
+                            <i class="fas fa-info-circle"></i>
+                            请输入完整的API端点URL
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="token">
+                        <i class="fas fa-key"></i>
+                        认证令牌
+                    </label>
+                    <div class="input-wrapper">
+                        <input type="text" id="token" value="openapi-xRxmKd5jHwc7hM7BXESylFzP1grOHlPbJC4Mug4ZXBBkXeeabPH67QVhAO" placeholder="输入Bearer Token">
+                        <div class="input-hint">
+                            <i class="fas fa-shield-alt"></i>
+                            用于API身份验证的令牌
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label" for="jsonData">
+                        <i class="fas fa-question-circle"></i>
+                        请求数据
+                    </label>
+                    <div class="input-wrapper">
+                        <textarea id="jsonData" placeholder="请输入您的问题...">你好</textarea>
+                        <div class="input-hint">
+                            <i class="fas fa-info-circle"></i>
+                            直接输入您想要询问的问题内容
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="btn hover-lift" onclick="sendRequest()">
+                    <i class="fas fa-paper-plane"></i>
+                    发送请求
+                </button>
+                
+                <div class="loading" id="loading">
+                    <i class="fas fa-spinner"></i>
+                    正在发送请求，请稍候...
+                </div>
+            </div>
+            
+            <!-- 输出区域 -->
+            <div class="output-section slide-in-right">
+                <div class="section-header">
+                    <div class="section-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h2 class="section-title">响应结果</h2>
+                        <p class="section-subtitle">API响应数据和分析</p>
+                        <div class="execution-time" id="executionTime" style="display: none;">
+                            <i class="fas fa-clock"></i>
+                            <span>执行时间: <strong id="timeValue">0ms</strong></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="response-container hover-lift" id="response">示例回复：哈喽~ 同学你好呀！👋 我是你的论文指导学长~ 最近是在为论文发愁吗？选题没头绪🤔、结构理不清🧩，还是参考文献找不到呀？不管遇到啥问题，都可以跟我说哦~ 我来帮你一起搞定！💪
+
+💡 提示：
+• 使用 Ctrl+Enter 快速发送请求
+• 响应数据将以markdown格式显示
+• 支持高亮和格式化
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 主题管理
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+        
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+        
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon-nav');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        
+        // API请求功能
+        async function sendRequest() {
+            const apiUrl = document.getElementById('apiUrl').value;
+            const token = document.getElementById('token').value;
+            const jsonDataText = document.getElementById('jsonData').value;
+            const responseDiv = document.getElementById('response');
+            const loadingDiv = document.getElementById('loading');
+            const button = document.querySelector('.btn');
+            
+            // 添加按钮点击动画
+            button.classList.add('btn-click');
+            setTimeout(() => {
+                button.classList.remove('btn-click');
+            }, 300);
+            
+            // 验证输入
+            if (!apiUrl || !token || !jsonDataText) {
+                showMessage('请填写所有必需字段', 'error');
+                return;
+            }
+            
+            // 将用户输入的问题包装成JSON格式，同时包含URL和token
+            const requestData = {
+                "url": apiUrl,
+                "token": token,
+                "data": jsonDataText.trim()
+            };
+            
+            // 显示加载状态
+            loadingDiv.style.display = 'block';
+            loadingDiv.classList.add('loading-enhanced');
+            button.disabled = true;
+            responseDiv.textContent = '🔄 正在处理请求...\n\n请稍候，我们正在为您发送API请求。';
+            responseDiv.classList.remove('has-content');
+            
+            try {
+                const startTime = Date.now();
+                const response = await fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const endTime = Date.now();
+                const duration = endTime - startTime;
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP错误: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 提取并渲染content内容
+                let content = '';
+                if (result && result.content) {
+                    content = result.content;
+                } else if (result && result.raw_text) {
+                    content = result.raw_text;
+                } else {
+                    content = JSON.stringify(result, null, 2);
+                }
+                
+                // 使用marked渲染markdown
+                try {
+                    responseDiv.innerHTML = marked.parse(content);
+                } catch (markdownError) {
+                    // 如果markdown渲染失败，显示原始文本
+                    responseDiv.textContent = content;
+                }
+                
+                responseDiv.classList.add('has-content');
+                
+                // 显示执行时间
+                const executionTimeDiv = document.getElementById('executionTime');
+                const timeValueSpan = document.getElementById('timeValue');
+                if (result.execution_time_s !== undefined) {
+                    timeValueSpan.textContent = `${result.execution_time_s}s`;
+                    executionTimeDiv.style.display = 'flex';
+                } else {
+                    executionTimeDiv.style.display = 'none';
+                }
+                
+                showMessage('🎉 请求成功完成！', 'success');
+                
+                // 在控制台显示完整响应信息
+                console.log(`✅ 请求成功完成\n⏱️ 响应时间: ${duration}ms\n📊 状态码: ${response.status}\n📋 完整响应:`, result);
+                if (result.execution_time_s !== undefined) {
+                    console.log(`🚀 API执行时间: ${result.execution_time_s}s`);
+                }
+                
+            } catch (error) {
+                console.error('请求失败:', error);
+                const errorResponse = `❌ 请求失败\n\n🔍 错误详情:\n${error.message}\n\n💡 请检查：\n• API地址是否正确\n• 认证令牌是否有效\n• JSON数据格式是否正确\n• 网络连接是否正常`;
+                responseDiv.textContent = errorResponse;
+                responseDiv.classList.add('has-content');
+                showMessage('❌ 请求失败: ' + error.message, 'error');
+            } finally {
+                // 隐藏加载状态
+                loadingDiv.style.display = 'none';
+                loadingDiv.classList.remove('loading-enhanced');
+                button.disabled = false;
+            }
+        }
+        
+        function showMessage(message, type) {
+            removeMessages();
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type} message-enter`;
+            
+            const icon = type === 'error' ? 'fas fa-exclamation-triangle' : 
+                        type === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle';
+            
+            messageDiv.innerHTML = `<i class="${icon}"></i>${message}`;
+            document.querySelector('.input-section').appendChild(messageDiv);
+            
+            // 错误消息添加抖动效果
+            if (type === 'error') {
+                const inputSection = document.querySelector('.input-section');
+                inputSection.classList.add('shake');
+                setTimeout(() => {
+                    inputSection.classList.remove('shake');
+                }, 500);
+            }
+            
+            // 自动移除消息
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                messageDiv.style.transform = 'translateX(-100%)';
+                setTimeout(() => {
+                    messageDiv.remove();
+                }, 300);
+            }, 5000);
+        }
+        
+        function removeMessages() {
+            const messages = document.querySelectorAll('.message');
+            messages.forEach(msg => msg.remove());
+        }
+        
+        // 键盘快捷键
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                sendRequest();
+            }
+        });
+        
+        // 监听系统主题变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+            if (!localStorage.getItem('theme')) {
+                const theme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+                updateThemeIcon(theme);
+            }
+        });
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            initTheme();
+            initAnimations();
+            console.log('🚀 API Tester Pro 已加载完成!');
+            console.log('💡 快捷键提示:');
+            console.log('   • Ctrl+Enter: 快速发送请求');
+            console.log('   • 主题切换: 点击右上角按钮');
+            
+            // 添加欢迎提示
+            setTimeout(() => {
+                showMessage('👋 欢迎使用 API Tester Pro！', 'success');
+            }, 1500);
+        });
+        
+        // 初始化动画
+        function initAnimations() {
+            // 延迟显示各个元素，创造层次感
+            const elements = [
+                { selector: '.theme-toggle', delay: 200 },
+                { selector: '.hero', delay: 400 },
+                { selector: '.input-section', delay: 600 },
+                { selector: '.output-section', delay: 800 }
+            ];
+            
+            elements.forEach(({ selector, delay }) => {
+                setTimeout(() => {
+                    const element = document.querySelector(selector);
+                    if (element) {
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }
+                }, delay);
+            });
+            
+            // 为输入框添加焦点动画监听
+            const inputs = document.querySelectorAll('input, textarea');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.classList.add('focused');
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('focused');
+                });
+            });
+            
+            // 为统计项添加延迟动画
+            const statItems = document.querySelectorAll('.stat-item');
+            statItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                }, 1000 + (index * 200));
+            });
+        }
+        
+        // 添加页面可见性检测
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') {
+                console.log('🔄 页面重新激活');
+            }
+        });
+    </script>
+</body>
+</html>
